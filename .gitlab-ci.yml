@@ -1,0 +1,13 @@
+image: python:3.8-onbuild
+
+build:
+  only:
+    - master
+  script:
+    - pip install -e .
+    - pytest
+    - python setup.py sdist
+  artifacts:
+    paths:
+      - dist
+    expire_in: 1 week

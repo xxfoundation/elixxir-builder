@@ -1,0 +1,5 @@
+[run]
+source = builder
+
+[report]
+fail_under = 1

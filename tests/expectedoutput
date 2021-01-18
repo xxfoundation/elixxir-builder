@@ -1,0 +1,7 @@
+Usage: cli [OPTIONS]
+
+  XX Network Builder
+
+Options:
+  -o, --output FILENAME  Optional output file
+  --help                 Show this message and exit.

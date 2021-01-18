@@ -1,0 +1,10 @@
+*.log
+*.pyc
+*.egg-info
+*~
+/.cache
+/.python-version
+.coverage
+TAGS
+coverage.xml
+htmlcov
