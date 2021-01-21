@@ -15,6 +15,7 @@ setup(
         'pytest',
         'coverage',
         'click',
+        'termcolor',
     ],
     entry_points={
        'console_scripts': [

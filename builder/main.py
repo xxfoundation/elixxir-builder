@@ -57,7 +57,6 @@ proj_conf = {
     },
 }
 
-
 #@click.command(help='XX Network Builder')
 @click.group(chain=True)
 def cli():
@@ -66,18 +65,21 @@ def cli():
 
 #@cli.argument('pkg', help=('Any of {}'.format(','.join(proj_conf.keys()))))
 
-@cli.command('clone')
+@cli.command('clone', help=('clones fresh copies of everything, will fail '
+                            'if anything is pre-existing. Delete your '
+                            'xx_network and elixxir directories before '
+                            'running this command'))
 def clone():
     for k, v in proj_conf.items():
         build.clone(v['repo'])
 
-@cli.command('checkout')
+@cli.command('checkout', help=('create a new branch, if needed, and checkout'))
 @click.argument('branch')
 def checkout(branch):
     for k, v in proj_conf.items():
         build.checkout(v['repo'], branch)
 
-@cli.command('build')
+@cli.command('build', help=('Status command, runs build on everything'))
 def buildcmd():
     for k, v in proj_conf.items():
         branch = str(build.get_branch(v['repo']))
@@ -86,7 +88,10 @@ def buildcmd():
             'git@gitlab.com:', 'gitlab.com/') for repo in dep_repos]
         build.build(v['repo'])
 
-@cli.command('update')
+@cli.command('update', help=('Runs go get on each dependency, then pushes '
+                             'go.mod and go.sum back up to the repository. '
+                             'This will fail if you have uncommitted changes '
+                             'in a repository.'))
 def update():
     for k, v in proj_conf.items():
         branch = str(build.get_branch(v['repo']))
@@ -95,7 +100,7 @@ def update():
             'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
         build.update(v['repo'], deps)
 
-@cli.command('test')
+@cli.command('test', help=('Status command, runs go test on everything'))
 def test():
     for k, v in proj_conf.items():
         branch = str(build.get_branch(v['repo']))
@@ -105,14 +110,6 @@ def test():
         build.test(v['repo'])
 
 
-@cli.command('push')
-def push():
-    for k, v in proj_conf.items():
-        branch = str(build.get_branch(v['repo']))
-        dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
-        deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
-        build.push(v['repo'])
 
 
 if __name__ == '__main__':

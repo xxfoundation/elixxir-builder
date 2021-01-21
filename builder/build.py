@@ -5,6 +5,8 @@ building.py - utils for checking out and building
 import os
 import subprocess
 
+from termcolor import colored
+
 def get_dir(path):
     return path.split(':')[1]
 
@@ -12,14 +14,16 @@ def run(cmd):
     print(" ".join(cmd))
     result = subprocess.run(cmd, capture_output=True)
     if result.returncode != 0:
-        print("Error: ", result)
+        print(result.args, ' process returned: ', result.returncode)
+        print(result.stdout.decode('utf-8'))
+        print(colored(result.stderr.decode('utf-8'), 'red'))
     return result
 
 def get_branch(repo):
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
     print("Path: ", os.getcwd())
-    res = run(['git', 'status'])
+    res = subprocess.run(['git', 'status'], capture_output=True)
     os.chdir(cwd)
     for line in res.stdout.splitlines():
         return line[len('On branch '):].decode('utf-8')
@@ -47,6 +51,7 @@ def checkout(repo, branch):
     print("Path: ", os.getcwd())
     cmds = [
         ['git', 'checkout', '-B', branch],
+        ['git', 'pull'],
         ['git', 'push', '-u', 'origin', branch],
         ['git', 'pull'],
     ]
@@ -55,6 +60,26 @@ def checkout(repo, branch):
 
     os.chdir(cwd)
 
+def check_changes():
+    res = run(['git', 'status'])
+    modified_fns = []
+    for line in res.stdout.decode('utf-8'):
+        if "Untracked files" in line:
+            print(colored(res.stdout, "red"))
+            print("Commit or delete 'Untracked files' before continuing")
+            return False
+        if "modified" in line:
+            modified_fns.append(line.split(":   ")[1])
+    for fn in modified_fns:
+        if 'go.sum' in fn:
+            continue
+        if 'go.mod' in fn:
+            continue
+        print(colored(res.stdout, "red"))
+        print("Commit your changes before continuing")
+        return False
+
+    return True
 
 def update(repo, dependencies):
     if not repo:
@@ -65,12 +90,28 @@ def update(repo, dependencies):
 
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
-    for dep in dependencies:
-        cmd = ['go', 'get', '-u', dep]
-        res = run(cmd)
+    try:
+        res = run(['git', 'pull'])
         if res.returncode != 0:
-            os.chdir(cwd)
-            raise("ERROR!")
+            raise("fix pull then try again")
+        for dep in dependencies:
+            cmd = ['go', 'get', '-u', dep]
+            res = run(cmd)
+            if res.returncode != 0:
+                raise("Update failure")
+        if not check_changes():
+            raise("bad repository state, will not update")
+        res = run(['git', 'commit', 'go.mod', 'go.sum', '-m',
+                   'update deps'])
+        # 1 means nothing to commit, not an error
+        if res.returncode != 0 and res.returncode != 1:
+            raise("could not commit")
+        res = run(['git', 'push'])
+        if res.returncode != 0:
+            raise("could not push")
+    except:
+        os.chdir(cwd)
+        raise
     os.chdir(cwd)
 
 def build(repo):
@@ -80,8 +121,6 @@ def build(repo):
     os.chdir(get_dir(repo))
     res = run(['go', 'build', './...'])
     os.chdir(cwd)
-    if res.returncode != 0:
-        raise("ERROR!")
 
 def test(repo):
     if not repo:
@@ -90,22 +129,22 @@ def test(repo):
     os.chdir(get_dir(repo))
     res = run(['go', 'test', '-v', './...'])
     os.chdir(cwd)
-    if res.returncode != 0:
-        raise("ERROR!")
 
 def status(repo):
     if not repo:
         raise("need repo to build!")
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
-    run(['git', 'status'])
+    res = run(['git', 'status'])
     os.chdir(cwd)
+    return res
 
-def push(repo):
+def merge(repo):
     if not repo:
         raise("need repo to build!")
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
-    res = run(['git', 'commit', '-m', 'update deps', '.'])
-    res = run(['git', 'push'])
+    res = run(['git', 'status'])
+    #res = run(['git', 'commit', '-m', 'update deps', '.'])
+    #res = run(['git', 'push'])
     os.chdir(cwd)
