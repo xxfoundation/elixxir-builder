@@ -47,7 +47,7 @@ def checkout(repo, branch):
     print("Path: ", os.getcwd())
     cmds = [
         ['git', 'checkout', '-B', branch],
-        ['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
+        ['git', 'push', '-u', 'origin', branch],
         ['git', 'pull'],
     ]
     for cmd in cmds:
@@ -106,7 +106,6 @@ def push(repo):
         raise("need repo to build!")
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
-    res = run(['git', 'status'])
+    res = run(['git', 'commit', '-m', 'update deps', '.'])
+    res = run(['git', 'push'])
     os.chdir(cwd)
-    if res.returncode != 0:
-        raise("ERROR!")

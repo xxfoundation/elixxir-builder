@@ -84,8 +84,16 @@ def buildcmd():
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
             'git@gitlab.com:', 'gitlab.com/') for repo in dep_repos]
-        build.update(v['repo'], deps)
         build.build(v['repo'])
+
+@cli.command('update')
+def update():
+    for k, v in proj_conf.items():
+        branch = str(build.get_branch(v['repo']))
+        dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
+        deps = ['{}@{}'.format(repo, branch).replace(
+            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+        build.update(v['repo'], deps)
 
 @cli.command('test')
 def test():
@@ -94,8 +102,17 @@ def test():
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
             'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
-        build.update(v['repo'], deps)
         build.test(v['repo'])
+
+
+@cli.command('push')
+def push():
+    for k, v in proj_conf.items():
+        branch = str(build.get_branch(v['repo']))
+        dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
+        deps = ['{}@{}'.format(repo, branch).replace(
+            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+        build.push(v['repo'])
 
 
 if __name__ == '__main__':
