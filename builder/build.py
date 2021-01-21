@@ -144,7 +144,11 @@ def merge(repo):
         raise("need repo to build!")
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
-    res = run(['git', 'status'])
+    try:
+        check_changes()
     #res = run(['git', 'commit', '-m', 'update deps', '.'])
     #res = run(['git', 'push'])
+    except:
+        os.chdir(cwd)
+        raise("Badd")
     os.chdir(cwd)
