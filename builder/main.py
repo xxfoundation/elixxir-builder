@@ -109,18 +109,30 @@ def test():
             'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
         build.test(v['repo'])
 
-@cli.command('merge', help=('Report changes'))
+@cli.command('mergeinto', help=('Merge all changes from this branch, then'
+                                ' merge into it if go.sum and go.mod are the'
+                                ' only changes'))
 @click.argument('target')
-def merge(target):
+def mergeinto(target):
     for k, v in proj_conf.items():
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
             'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
-        build.merge(v['repo'], target)
+        build.mergeinto(v['repo'], target)
+
+@cli.command('mergefrom', help=('Merge all changes from this branch'))
+@click.argument('target')
+def mergefrom(target):
+    for k, v in proj_conf.items():
+        branch = str(build.get_branch(v['repo']))
+        dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
+        deps = ['{}@{}'.format(repo, branch).replace(
+            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+        build.mergefrom(v['repo'], target)
 
 
-@cli.command('status', help=('Report changes'))
+@cli.command('status', help=('Report changes between us and release'))
 def status():
     for k, v in proj_conf.items():
         branch = str(build.get_branch(v['repo']))

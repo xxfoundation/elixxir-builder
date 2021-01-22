@@ -50,7 +50,9 @@ def checkout(repo, branch):
     os.chdir(target_dir)
     print("Path: ", os.getcwd())
     cmds = [
+        ['git', 'pull'],
         ['git', 'checkout', '-B', branch],
+        ['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
         ['git', 'pull'],
         ['git', 'push', '-u', 'origin', branch],
         ['git', 'pull'],
@@ -149,7 +151,7 @@ def status(repo):
     os.chdir(cwd)
     return res
 
-def merge(repo, target):
+def mergeinto(repo, target):
     if not repo or not target:
         raise("need repo and target to build!")
     cwd = os.getcwd()
@@ -182,6 +184,25 @@ def merge(repo, target):
             res = run(['git', 'push'])
             if res.returncode != 0:
                 raise("unable to push to target")
+    except:
+        os.chdir(cwd)
+        raise
+    os.chdir(cwd)
+
+def mergefrom(repo, target):
+    if not repo or not target:
+        raise("need repo and target to build!")
+    cwd = os.getcwd()
+    branch = get_branch(repo)
+    os.chdir(get_dir(repo))
+    try:
+        run(['git', 'pull'])
+        run(['git', 'merge', target])
+        run(['git', 'checkout', '--ours', 'go.mod', 'go.sum'])
+        run(['git', 'commit'])
+        res = run(['git', 'push'])
+        if res.returncode != 0:
+            raise("fix errors and rerurn")
     except:
         os.chdir(cwd)
         raise
