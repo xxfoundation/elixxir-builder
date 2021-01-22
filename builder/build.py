@@ -135,20 +135,54 @@ def status(repo):
         raise("need repo to build!")
     cwd = os.getcwd()
     os.chdir(get_dir(repo))
-    res = run(['git', 'status'])
+    if not check_changes():
+        print(colored("{} needs changes committed".format(repo), "red"))
+    res = run(['git', 'diff', '--name-only', 'release'])
+    changed_fns = []
+    for line in res.stdout.decode('utf-8').splitlines():
+        if 'go.sum' in line or 'go.mod' in line:
+            continue
+        changed_fns.append(line)
+    if len(changed_fns) != 0:
+            print(colored(("Changed files present for {}: "
+                          "{}").format(repo, changed_fns), "red"))
     os.chdir(cwd)
     return res
 
-def merge(repo):
-    if not repo:
-        raise("need repo to build!")
+def merge(repo, target):
+    if not repo or not target:
+        raise("need repo and target to build!")
     cwd = os.getcwd()
+    branch = get_branch(repo)
     os.chdir(get_dir(repo))
     try:
-        check_changes()
-    #res = run(['git', 'commit', '-m', 'update deps', '.'])
-    #res = run(['git', 'push'])
+        run(['git', 'pull'])
+        run(['git', 'merge', target])
+        run(['git', 'checkout', '--ours', 'go.mod', 'go.sum'])
+        run(['git', 'commit'])
+        res = run(['git', 'push'])
+        if res.returncode != 0:
+            raise("fix errors and rerurn")
+        res = run(['git', 'diff', '--name-only', target])
+        changed_fns = []
+        for line in res.stdout.decode('utf-8'):
+            if 'go.sum' in line or 'go.mod' in line:
+                continue
+            changed_fns.append(line)
+        if len(changed_fns) != 0:
+            print(colored(("Changed files present, not merging: "
+                          "{}").format(changed_fns), "red"))
+        else:
+            res = run(['git', 'checkout', target])
+            if res.returncode != 0:
+                raise("unable to checkout target")
+            res = run(['git', 'merge', branch])
+            if res.returncode != 0:
+                raise("unable to merge branch")
+            res = run(['git', 'push'])
+            if res.returncode != 0:
+                raise("unable to push to target")
     except:
         os.chdir(cwd)
-        raise("Badd")
+        raise
     os.chdir(cwd)

@@ -109,8 +109,25 @@ def test():
             'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
         build.test(v['repo'])
 
+@cli.command('merge', help=('Report changes'))
+@click.argument('target')
+def merge(target):
+    for k, v in proj_conf.items():
+        branch = str(build.get_branch(v['repo']))
+        dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
+        deps = ['{}@{}'.format(repo, branch).replace(
+            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+        build.merge(v['repo'], target)
 
 
+@cli.command('status', help=('Report changes'))
+def status():
+    for k, v in proj_conf.items():
+        branch = str(build.get_branch(v['repo']))
+        dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
+        deps = ['{}@{}'.format(repo, branch).replace(
+            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+        build.status(v['repo'])
 
 if __name__ == '__main__':
     cli()
