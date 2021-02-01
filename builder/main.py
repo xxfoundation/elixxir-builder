@@ -55,6 +55,11 @@ proj_conf = {
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'comms', 'client'],
     },
+    'permissioning': {
+        'repo': 'git@gitlab.com:elixxir/registration',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+                         'primitives', 'crypto', 'comms'],
+    },
 }
 
 #@click.command(help='XX Network Builder')
