@@ -40,6 +40,11 @@ proj_conf = {
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'comms'],
     },
+    'permissioning': {
+        'repo': 'git@gitlab.com:elixxir/registration',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+                         'primitives', 'crypto', 'comms'],
+    },
     'gateway': {
         'repo': 'git@gitlab.com:elixxir/gateway',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
@@ -54,11 +59,6 @@ proj_conf = {
         'repo': 'git@gitlab.com:elixxir/user-discovery-bot',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'comms', 'client'],
-    },
-    'permissioning': {
-        'repo': 'git@gitlab.com:elixxir/registration',
-        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms'],
     },
 }
 
