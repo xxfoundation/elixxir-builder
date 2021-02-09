@@ -4,6 +4,7 @@ building.py - utils for checking out and building
 
 import os
 import subprocess
+import shutil
 
 from termcolor import colored
 
@@ -44,17 +45,15 @@ def checkout(repo, branch):
 
     target_dir = get_dir(repo)
     if not os.path.exists(target_dir):
-        clone(repo)
+        shutil.rmtree(target_dir)
+    clone(repo)
 
     cwd = os.getcwd()
     os.chdir(target_dir)
     print("Path: ", os.getcwd())
     cmds = [
-        ['git', 'pull'],
         ['git', 'checkout', '-B', branch],
         ['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
-        ['git', 'pull'],
-        ['git', 'push', '-u', 'origin', branch],
         ['git', 'pull'],
     ]
     for cmd in cmds:
