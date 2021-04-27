@@ -44,7 +44,7 @@ def checkout(repo, branch):
         raise("Cannot checkout without repo and branch!")
 
     target_dir = get_dir(repo)
-    if not os.path.exists(target_dir):
+    if os.path.exists(target_dir):
         shutil.rmtree(target_dir)
     clone(repo)
 
