@@ -60,6 +60,11 @@ proj_conf = {
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'comms', 'client'],
     },
+    'notifications-bot': {
+        'repo': 'git@gitlab.com:elixxir/notifications-bot',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+                         'primitives', 'crypto', 'comms'],
+    },
 }
 
 #@click.command(help='XX Network Builder')
