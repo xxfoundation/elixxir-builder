@@ -96,10 +96,13 @@ def update(repo, dependencies):
         if res.returncode != 0:
             raise("fix pull then try again")
         for dep in dependencies:
-            cmd = ['go', 'get', '-u', dep]
+            cmd = ['go', 'get', dep]
             res = run(cmd)
             if res.returncode != 0:
                 raise("Update failure")
+            res = run(cmd)
+            if res.returncode != 0:
+                raise("Second update failure")
         if not check_changes():
             raise("bad repository state, will not update")
         res = run(['git', 'commit', 'go.mod', 'go.sum', '-m',
