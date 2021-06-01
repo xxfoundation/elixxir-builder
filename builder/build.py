@@ -55,6 +55,7 @@ def checkout(repo, branch):
         ['git', 'checkout', '-B', branch],
         ['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
         ['git', 'pull'],
+        ['git', 'push', '-u', 'origin', branch],
     ]
     for cmd in cmds:
         run(cmd)
@@ -105,6 +106,7 @@ def update(repo, dependencies):
                 raise("Second update failure")
         if not check_changes():
             raise("bad repository state, will not update")
+        run(['go', 'mod', 'tidy'])
         res = run(['git', 'commit', 'go.mod', 'go.sum', '-m',
                    'update deps'])
         # 1 means nothing to commit, not an error

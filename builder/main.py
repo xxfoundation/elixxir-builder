@@ -30,40 +30,44 @@ proj_conf = {
         'repo': 'git@gitlab.com:elixxir/crypto',
         'dependencies': ['xxprimitives', 'xxcrypto', 'primitives'],
     },
+    'ring': {
+        'repo': 'git@gitlab.com:xx_network/ring',
+        'dependencies': [],
+    },
     'comms': {
         'repo': 'git@gitlab.com:elixxir/comms',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto'],
+                         'primitives', 'crypto', 'ring'],
     },
     'server': { # Note -- leaving out GPU, ekv, and others for now!
         'repo': 'git@gitlab.com:elixxir/server',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms'],
+                         'primitives', 'crypto', 'ring', 'comms'],
     },
     'permissioning': {
         'repo': 'git@gitlab.com:elixxir/registration',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms'],
+                         'primitives', 'crypto', 'ring', 'comms'],
     },
     'gateway': {
         'repo': 'git@gitlab.com:elixxir/gateway',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms'],
+                         'primitives', 'crypto', 'ring', 'comms'],
     },
     'client': {
         'repo': 'git@gitlab.com:elixxir/client',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms'],
+                         'primitives', 'crypto', 'ring', 'comms'],
     },
     'udb': {
         'repo': 'git@gitlab.com:elixxir/user-discovery-bot',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms', 'client'],
+                         'primitives', 'crypto', 'ring', 'comms', 'client'],
     },
     'notifications-bot': {
         'repo': 'git@gitlab.com:elixxir/notifications-bot',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'comms'],
+                         'primitives', 'crypto', 'ring', 'comms'],
     },
 }
 
