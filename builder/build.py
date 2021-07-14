@@ -52,8 +52,9 @@ def checkout(repo, branch):
     os.chdir(target_dir)
     print("Path: ", os.getcwd())
     cmds = [
+        ['git', 'fetch' ],
         ['git', 'checkout', '-B', branch],
-        ['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
+        #['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
         ['git', 'pull'],
         ['git', 'push', '-u', 'origin', branch],
     ]

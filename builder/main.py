@@ -49,6 +49,12 @@ proj_conf = {
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'ring', 'comms'],
     },
+    'client-registrar': {
+        'repo': 'git@gitlab.com:elixxir/client-registrar',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+                         'primitives', 'crypto', 'ring', 'comms',
+                         'registration'],
+    },
     'gateway': {
         'repo': 'git@gitlab.com:elixxir/gateway',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
