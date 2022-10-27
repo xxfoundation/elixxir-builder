@@ -11,70 +11,85 @@ from builder import build
 
 proj_conf = {
     'xxprimitives': {
-        'repo': 'git@gitlab.com:xx_network/primitives',
+        'repo': 'git@git.xx.network:xx_network/primitives',
+        'dependencies': [],
+    },
+    'grpc-web-go-client': {
+        'repo': 'git@git.xx.network:elixxir/grpc-web-go-client',
         'dependencies': [],
     },
     'xxcrypto': {
-        'repo': 'git@gitlab.com:xx_network/crypto',
+        'repo': 'git@git.xx.network:xx_network/crypto',
         'dependencies': ['xxprimitives'],
     },
     'xxcomms': {
-        'repo': 'git@gitlab.com:xx_network/comms',
-        'dependencies': ['xxprimitives', 'xxcrypto'],
+        'repo': 'git@git.xx.network:xx_network/comms',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'grpc-web-go-client'],
     },
     'primitives': {
-        'repo': 'git@gitlab.com:elixxir/primitives',
+        'repo': 'git@git.xx.network:elixxir/primitives',
         'dependencies': ['xxprimitives'],
     },
     'crypto': {
-        'repo': 'git@gitlab.com:elixxir/crypto',
+        'repo': 'git@git.xx.network:elixxir/crypto',
         'dependencies': ['xxprimitives', 'xxcrypto', 'primitives'],
     },
     'ring': {
-        'repo': 'git@gitlab.com:xx_network/ring',
+        'repo': 'git@git.xx.network:xx_network/ring',
         'dependencies': [],
     },
     'comms': {
-        'repo': 'git@gitlab.com:elixxir/comms',
+        'repo': 'git@git.xx.network:elixxir/comms',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'ring'],
+                         'primitives', 'crypto', 'ring', 'grpc-web-go-client'],
     },
-    'server': { # Note -- leaving out GPU, ekv, and others for now!
-        'repo': 'git@gitlab.com:elixxir/server',
-        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'ring', 'comms'],
-    },
+    # 'server': { # Note -- leaving out GPU, ekv, and others for now!
+    #     'repo': 'git@git.xx.network:elixxir/server',
+    #     'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+    #                      'primitives', 'crypto', 'ring', 'comms'],
+    # },
     'permissioning': {
-        'repo': 'git@gitlab.com:elixxir/registration',
+        'repo': 'git@git.xx.network:elixxir/registration',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'ring', 'comms'],
     },
     'client-registrar': {
-        'repo': 'git@gitlab.com:elixxir/client-registrar',
+        'repo': 'git@git.xx.network:elixxir/client-registrar',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'ring', 'comms',
-                         'registration'],
+                         'permissioning'],
     },
     'gateway': {
-        'repo': 'git@gitlab.com:elixxir/gateway',
+        'repo': 'git@git.xx.network:elixxir/gateway',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'ring', 'comms'],
     },
     'client': {
-        'repo': 'git@gitlab.com:elixxir/client',
-        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'ring', 'comms'],
+        'repo': 'git@git.xx.network:elixxir/client',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'grpc-web-go-client',
+                         'xxcomms', 'primitives', 'crypto', 'ring', 'comms'],
     },
     'udb': {
-        'repo': 'git@gitlab.com:elixxir/user-discovery-bot',
+        'repo': 'git@git.xx.network:elixxir/user-discovery-bot',
         'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
                          'primitives', 'crypto', 'ring', 'comms', 'client'],
     },
-    'notifications-bot': {
-        'repo': 'git@gitlab.com:elixxir/notifications-bot',
-        'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
-                         'primitives', 'crypto', 'ring', 'comms'],
+    'xxdk-wasm': {
+        'repo': 'git@git.xx.network:elixxir/xxdk-wasm',
+        'dependencies': ['xxprimitives', 'xxcrypto', 'grpc-web-go-client',
+                         'xxcomms', 'primitives', 'crypto', 'ring',
+                         'comms', 'client'],
     },
+    # 'notifications-bot': {
+    #     'repo': 'git@git.xx.network:elixxir/notifications-bot',
+    #     'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+    #                      'primitives', 'crypto', 'ring', 'comms'],
+    # },
+    # 'coupon-bot': {
+    #     'repo': 'git@git.xx.network:elixxir/coupon-bot',
+    #     'dependencies': ['xxprimitives', 'xxcrypto', 'xxcomms',
+    #                      'primitives', 'crypto', 'ring', 'comms', 'client'],
+    # },
 }
 
 #@click.command(help='XX Network Builder')
@@ -105,7 +120,7 @@ def buildcmd():
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', 'gitlab.com/') for repo in dep_repos]
+            'git@git.xx.network:', 'git.xx.network/') for repo in dep_repos]
         build.build(v['repo'])
 
 @cli.command('update', help=('Runs go get on each dependency, then pushes '
@@ -114,10 +129,12 @@ def buildcmd():
                              'in a repository.'))
 def update():
     for k, v in proj_conf.items():
+        # if k != "client":
+        #      continue
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+            'git@git.xx.network:', "git.xx.network/") for repo in dep_repos]
         build.update(v['repo'], deps)
 
 @cli.command('test', help=('Status command, runs go test on everything'))
@@ -126,7 +143,7 @@ def test():
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+            'git@git.xx.network:', "git.xx.network/") for repo in dep_repos]
         build.test(v['repo'])
 
 @cli.command('mergeinto', help=('Merge all changes from this branch, then'
@@ -138,7 +155,7 @@ def mergeinto(target):
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+            'git@git.xx.network:', "git.xx.network/") for repo in dep_repos]
         build.mergeinto(v['repo'], target)
 
 @cli.command('mergefrom', help=('Merge all changes from this branch'))
@@ -148,7 +165,7 @@ def mergefrom(target):
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+            'git@git.xx.network:', "git.xx.network/") for repo in dep_repos]
         build.mergefrom(v['repo'], target)
 
 
@@ -158,7 +175,7 @@ def status():
         branch = str(build.get_branch(v['repo']))
         dep_repos = [proj_conf[dep]['repo'] for dep in v['dependencies']]
         deps = ['{}@{}'.format(repo, branch).replace(
-            'git@gitlab.com:', "gitlab.com/") for repo in dep_repos]
+            'git@git.xx.network:', "git.xx.network/") for repo in dep_repos]
         build.status(v['repo'])
 
 if __name__ == '__main__':

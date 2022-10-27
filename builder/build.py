@@ -52,9 +52,10 @@ def checkout(repo, branch):
     os.chdir(target_dir)
     print("Path: ", os.getcwd())
     cmds = [
-        ['git', 'fetch' ],
-        ['git', 'checkout', '-B', branch],
-        #['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
+        ['git', 'pull'],
+        ['git', 'checkout', branch],
+        ['git', 'checkout', '-b', branch],
+        ['git', 'branch', '--set-upstream-to=origin/{}'.format(branch), branch],
         ['git', 'pull'],
         ['git', 'push', '-u', 'origin', branch],
     ]
@@ -82,6 +83,11 @@ def check_changes():
         print("Commit your changes before continuing")
         return False
 
+    res = run(['git', 'log', '--oneline'])
+    for line in res.stdout.decode('utf-8').split('\n'):
+        print(colored(line, 'blue'))
+        break
+
     return True
 
 def update(repo, dependencies):
@@ -97,8 +103,14 @@ def update(repo, dependencies):
         res = run(['git', 'pull'])
         if res.returncode != 0:
             raise("fix pull then try again")
+        # run(['go', 'clean', '-modcache'])
+        # run(['rm', 'go.mod'])
+        # run(['go', 'mod', 'init', repo.replace('git@', '').replace(':', '/')])
         for dep in dependencies:
-            cmd = ['go', 'get', dep]
+            actual_dep = dep
+            if 'grpc-web' not in actual_dep:
+                actual_dep = dep.replace('git.xx.network', 'gitlab.com')
+            cmd = ['go', 'get', actual_dep]
             res = run(cmd)
             if res.returncode != 0:
                 raise("Update failure")
@@ -107,7 +119,10 @@ def update(repo, dependencies):
                 raise("Second update failure")
         if not check_changes():
             raise("bad repository state, will not update")
-        run(['go', 'mod', 'tidy'])
+        run(['go', 'mod', 'tidy', '-compat=1.17']) # go mod tidy -compat=1.17
+        run(['go', 'mod', 'vendor'])
+        run(['make', 'release'])
+        run(['go', 'build', './...'])
         res = run(['git', 'commit', 'go.mod', 'go.sum', '-m',
                    'update deps'])
         # 1 means nothing to commit, not an error
@@ -204,6 +219,7 @@ def mergefrom(repo, target):
         run(['git', 'pull'])
         run(['git', 'merge', target])
         run(['git', 'checkout', '--ours', 'go.mod', 'go.sum'])
+        run(['git', 'add', 'go.sum', 'go.mod'])
         run(['git', 'commit'])
         res = run(['git', 'push'])
         if res.returncode != 0:
