@@ -9,7 +9,9 @@ import shutil
 from termcolor import colored
 
 def get_dir(path):
-    return path.split(':')[1]
+    dirp = path.split(':')[1]
+    parts = dirp.split('/')
+    return os.path.join(parts[0], parts[1])
 
 def run(cmd):
     print(" ".join(cmd))
@@ -32,6 +34,10 @@ def get_branch(repo):
 def clone(repo):
     if not repo:
         raise("Cannot clone without repository!")
+
+    if repo.endswith('/v4'):
+        repo = repo[:-3]
+
 
     target_dir = get_dir(repo)
     os.makedirs(target_dir, exist_ok=True)
@@ -119,7 +125,7 @@ def update(repo, dependencies):
                 raise("Second update failure")
         if not check_changes():
             raise("bad repository state, will not update")
-        run(['go', 'mod', 'tidy', '-compat=1.17']) # go mod tidy -compat=1.17
+        run(['go', 'mod', 'tidy', '-compat=1.19']) # go mod tidy -compat=1.19
         run(['go', 'mod', 'vendor'])
         run(['make', 'release'])
         run(['go', 'build', './...'])
@@ -181,6 +187,7 @@ def mergeinto(repo, target):
         run(['git', 'pull'])
         run(['git', 'merge', target])
         run(['git', 'checkout', '--ours', 'go.mod', 'go.sum'])
+        run(['git', 'add', 'go.sum', 'go.mod'])
         run(['git', 'commit'])
         res = run(['git', 'push'])
         if res.returncode != 0:
